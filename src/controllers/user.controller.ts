@@ -1,6 +1,6 @@
 import {prisma} from '../lib/prisma';
 
 export const getUsers = async(req :any, res:any) =>{
-    const users = await prisma.admin.findMany();
+    const users = await prisma.user.findMany();
     res.json(users);
 }
