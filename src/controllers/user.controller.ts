@@ -1,3 +1,4 @@
+import { NewUser } from './../../generated/prisma/browser';
 import {prisma} from '../lib/prisma';
 
 /*export const getUsers = async(req :any, res:any) =>{
@@ -5,6 +6,6 @@ import {prisma} from '../lib/prisma';
     res.json(users);
 }*/
 export const getUsers = async() => {
-    const users = await prisma.user.findMany();
+    const users = await prisma.newUser.findMany();
     return users;
 };
