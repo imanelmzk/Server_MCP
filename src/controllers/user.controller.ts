@@ -9,3 +9,21 @@ export const getUsers = async() => {
     const users = await prisma.newUser.findMany();
     return users;
 };
+
+export const createUser = async(params:{
+    //id: number;
+    name : string;
+    lastName : string;
+}) =>{
+    const newUser = await prisma.newUser.create({
+        data: params
+    });
+    return newUser;
+}
+/*
+export const createUser = async (userData: NewUser) => {
+    const newUser = await prisma.newUser.create({
+        data: userData,
+    });
+    return newUser;
+}*/

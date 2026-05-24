@@ -1,26 +1,73 @@
 import express from 'express';
+import {createUserSchema} from '../validators/user.schema';
+import {z} from "zod";
 import { getUsers } from '../controllers/user.controller';
+import {createUser} from '../controllers/user.controller';
+
+
+//import { any } from 'zod/v4/mini';
 //import userRoutes from '../routes/user.routes';
 
 const app = express();
 
 app.use(express.json());
+                
+    // * Typer "Method"
+    type Method = keyof typeof tools;
+    // * Typer "le body de la requete"
+    type MCPRequest = {
+        method: Method;
+        params?: any;
+    };
+ 
+   //* L'utilisation MCP + RCP
+   const tools ={
+    "tools/createUser": {
+        schema : z.object({
+            //id: z.number(),
+            name: z.string().min(1, "Name is required"),
+            lastName: z.string().min(1, "Last name is required"),
+        }), 
+        handler: createUser
+        }
+    }
+   
+   /*const tools ={
+    "tools/getUsers": getUsers,
+    "tools/createUser": createUser
+   } as const;*/
 
-// app.use('/api', userRoutes);
+   
 app.post("/mcp", async (req, res) => {
-    const {method, params} = req.body;
+    const {method, params} = req.body as MCPRequest; // les clés sont fixes et connus;
 
-    //* Logique MCP
+   const tool = tools[method]; // on accède à la méthode correspondante dans l'objet "tools" en utilisant le nom de la méthode fourni dans la requête. Le "as keyof typeof tools" est utilisé pour indiquer que "method" doit être une clé valide de l'objet "tools". Cela permet d'assurer que nous ne tentons pas d'accéder à une méthode qui n'existe pas dans l'objet "tools".
+   if(!tool){
+    return res.status(400).json({error: "Invalid method"});
+   }
+   try{
+    // * Validation ICI
+    const validatedParams = tool.schema.parse(params);
+
+    // * Execution safe
+    const result = await tool.handler(validatedParams);
+    return res.json({result});
+   }catch(error){
+    if(error instanceof z.ZodError){
+        return res.status(400).json({error:"Invalide Params", details: error});
+    }
+    return res.status(500).json({error: "Internal server error"});
+   }
+
+
+   //* Logique MCP
+    /*
     if (method === "tools/getUsers") {
         const result = await getUsers();
         return res.json({result});
-    }
-    res.status(400).json({error: "Method not found"});
-});
+    }*/
 
-//app.get("/", (req, res) => {
-//    res.send("API is running...");
-//});
+});
 
 app.listen(3000, () =>{
     console.log("Server is running on port 3000");
