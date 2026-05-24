@@ -20,10 +20,9 @@ export const createUser = async(params:{
     });
     return newUser;
 }
-/*
-export const createUser = async (userData: NewUser) => {
-    const newUser = await prisma.newUser.create({
-        data: userData,
+
+export const deleteUser = async (params:{id:number}) =>{
+    return prisma.newUser.delete({
+        where: {id: params.id}
     });
-    return newUser;
-}*/
+}

@@ -3,6 +3,7 @@ import {createUserSchema} from '../validators/user.schema';
 import {z} from "zod";
 import { getUsers } from '../controllers/user.controller';
 import {createUser} from '../controllers/user.controller';
+import {deleteUser} from '../controllers/user.controller';
 
 
 //import { any } from 'zod/v4/mini';
@@ -19,9 +20,14 @@ app.use(express.json());
         method: Method;
         params?: any;
     };
- 
+    // * Typer "Tool"
+    type Tool = {
+        schema: z.ZodTypeAny;
+        handler: (params: any) => Promise<any>;
+    };
+
    //* L'utilisation MCP + RCP
-   const tools ={
+   const tools : Record<string, Tool> = {
     "tools/createUser": {
         schema : z.object({
             //id: z.number(),
@@ -29,8 +35,17 @@ app.use(express.json());
             lastName: z.string().min(1, "Last name is required"),
         }), 
         handler: createUser
-        }
-    }
+        },
+        
+        
+      "tools/deleteUser":{
+        schema: z.object({
+            id: z.number(),
+        }),
+        handler: deleteUser
+       },
+    }  
+    
    
    /*const tools ={
     "tools/getUsers": getUsers,
@@ -47,7 +62,7 @@ app.post("/mcp", async (req, res) => {
    }
    try{
     // * Validation ICI
-    const validatedParams = tool.schema.parse(params);
+    const validatedParams = tool.schema.parse(params as any); // on utilise le schéma de validation associé à la méthode pour valider les paramètres fournis dans la requête. Si les paramètres ne sont pas conformes au schéma, une erreur de validation sera levée.
 
     // * Execution safe
     const result = await tool.handler(validatedParams);
