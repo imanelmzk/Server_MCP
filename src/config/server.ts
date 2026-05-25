@@ -21,13 +21,13 @@ app.use(express.json());
         params?: any;
     };
     // * Typer "Tool"
-    type Tool = {
-        schema: z.ZodTypeAny;
-        handler: (params: any) => Promise<any>;
+    type Tool<T> = {
+        schema: z.ZodType<T>;
+        handler: (params: T) => Promise<any>;
     };
 
    //* L'utilisation MCP + RCP
-   const tools : Record<string, Tool> = {
+   const tools : Record<string, Tool<any>> = {
     "tools/createUser": {
         schema : z.object({
             //id: z.number(),
