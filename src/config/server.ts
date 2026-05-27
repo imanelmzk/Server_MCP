@@ -1,4 +1,6 @@
 import express from 'express';
+import { AppError } from '../utils/AppError';
+import {errorHandler} from '../middleware/user.middleware';
 import {createUserSchema} from '../validators/user.schema';
 import {deleteUserSchema} from '../validators/user.schema';
 import {z} from "zod";
@@ -54,12 +56,13 @@ app.use(express.json());
    } as const;*/
 
    
-app.post("/mcp", async (req, res) => {
+app.post("/mcp", async (req, res, next) => {
     const {method, params} = req.body as MCPRequest; // les clés sont fixes et connus;
 
    const tool = tools[method]; // on accède à la méthode correspondante dans l'objet "tools" en utilisant le nom de la méthode fourni dans la requête. Le "as keyof typeof tools" est utilisé pour indiquer que "method" doit être une clé valide de l'objet "tools". Cela permet d'assurer que nous ne tentons pas d'accéder à une méthode qui n'existe pas dans l'objet "tools".
    if(!tool){
-    return res.status(400).json({error: "Invalid method"});
+    // return res.status(400).json({error: "Invalid method"});
+    throw new AppError("Invalid method", 400);
    }
    try{
     // * Validation ICI
@@ -67,22 +70,14 @@ app.post("/mcp", async (req, res) => {
 
     // * Execution safe
     const result = await tool.handler(validatedParams);
+
     return res.json({result});
+
    }catch(error){
-    console.error("REAL ERROR:", error);
-
-    if(error instanceof z.ZodError){
-        return res.status(400).json({
-            error:"Invalid Params",
-            details: error.issues
-        });
+    next(error); // 🔥 Envoie vers middleware
     }
-
-    return res.status(500).json({
-        error: "Internal server error",
-        message: (error as Error).message
-    });
-   }
+   });
+   
 
 
    //* Logique MCP
@@ -92,7 +87,7 @@ app.post("/mcp", async (req, res) => {
         return res.json({result});
     }*/
 
-});
+
 
 /* STYLE ==> 'REST'
 app.delete("/mcp", async (req, res) => {
@@ -112,6 +107,20 @@ app.delete("/mcp", async (req, res) => {
         return res.status(500).json({error: "Internal server error"});
        }
 })*/
+
+app.get("/user/:id", async(req, res, next) =>{
+    try{
+        const user = null;
+
+        if(!user){
+            throw new AppError("User not found", 404);
+        }
+        res.status(200).json({user});
+    } catch (error) {
+        next(error);// 🔥 Envoie vers middleware
+    }
+})
+app.use(errorHandler);
 app.listen(3000, () =>{
     console.log("Server is running on port 3000");
 })
