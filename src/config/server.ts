@@ -1,5 +1,6 @@
 import express from 'express';
 import {createUserSchema} from '../validators/user.schema';
+import {deleteUserSchema} from '../validators/user.schema';
 import {z} from "zod";
 import { getUsers } from '../controllers/user.controller';
 import {createUser} from '../controllers/user.controller';
@@ -68,10 +69,19 @@ app.post("/mcp", async (req, res) => {
     const result = await tool.handler(validatedParams);
     return res.json({result});
    }catch(error){
+    console.error("REAL ERROR:", error);
+
     if(error instanceof z.ZodError){
-        return res.status(400).json({error:"Invalide Params", details: error});
+        return res.status(400).json({
+            error:"Invalid Params",
+            details: error.issues
+        });
     }
-    return res.status(500).json({error: "Internal server error"});
+
+    return res.status(500).json({
+        error: "Internal server error",
+        message: (error as Error).message
+    });
    }
 
 
@@ -84,6 +94,24 @@ app.post("/mcp", async (req, res) => {
 
 });
 
+/* STYLE ==> 'REST'
+app.delete("/mcp", async (req, res) => {
+    const {method, params} = req.body as MCPRequest;
+    const tool = tools[method];
+    if(!tool){
+        return res.status(400).json({error: "Invalid method"});
+       }
+       try{
+        const validatedParams = tool.schema.parse(params as any);
+        const result = await tool.handler(validatedParams);
+        return res.json({result});
+       }catch(error){
+        if(error instanceof z.ZodError){
+            return res.status(400).json({error:"Invalide Params", details: error});
+        }
+        return res.status(500).json({error: "Internal server error"});
+       }
+})*/
 app.listen(3000, () =>{
     console.log("Server is running on port 3000");
 })
