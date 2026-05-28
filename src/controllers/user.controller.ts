@@ -21,8 +21,29 @@ export const createUser = async(params:{
     return newUser;
 }
 
-export const deleteUser = async (params:{id:number}) =>{
-    return prisma.newUser.delete({
-        where: {id: params.id}
+export const updateUser = async(params:{
+    id: number;
+    name?: string;
+    lastName?: string;
+}) => {
+    const data: any = {};
+
+    if (params.name !== undefined) data.name = params.name;
+    if (params.lastName !== undefined) data.lastName = params.lastName;
+    
+    return prisma.newUser.update({
+        where: {id: params.id},
+        data
     });
+}
+
+
+export const deleteUser = async (params:{id:number}) =>{
+    try {
+        return await prisma.newUser.delete({
+            where: { id: params.id }
+        });
+    } catch (error) {
+        throw new Error("User not found");
+    }
 }

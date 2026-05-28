@@ -1,12 +1,13 @@
 import express from 'express';
 import { AppError } from '../utils/AppError';
 import {errorHandler} from '../middleware/user.middleware';
-import {createUserSchema} from '../validators/user.schema';
+import {createUserSchema, updateUserSchema} from '../validators/user.schema';
 import {deleteUserSchema} from '../validators/user.schema';
 import {z} from "zod";
 import { getUsers } from '../controllers/user.controller';
 import {createUser} from '../controllers/user.controller';
 import {deleteUser} from '../controllers/user.controller';
+import { updateUser } from '../controllers/user.controller';
 
 
 //import { any } from 'zod/v4/mini';
@@ -32,19 +33,17 @@ app.use(express.json());
    //* L'utilisation MCP + RCP
    const tools : Record<string, Tool<any>> = {
     "tools/createUser": {
-        schema : z.object({
-            //id: z.number(),
-            name: z.string().min(1, "Name is required"),
-            lastName: z.string().min(1, "Last name is required"),
-        }), 
+        schema : createUserSchema, 
         handler: createUser
         },
         
+      "tools/updateUser":{
+        schema: updateUserSchema,
+        handler: updateUser
+      },  
         
       "tools/deleteUser":{
-        schema: z.object({
-            id: z.number(),
-        }),
+        schema: deleteUserSchema,
         handler: deleteUser
        },
     }  
