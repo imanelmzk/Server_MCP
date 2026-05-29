@@ -32,6 +32,11 @@ app.use(express.json());
 
    //* L'utilisation MCP + RCP
    const tools : Record<string, Tool<any>> = {
+
+    "tools/getUsers": {
+        schema: z.void(),
+        handler: getUsers
+    },
     "tools/createUser": {
         schema : createUserSchema, 
         handler: createUser
